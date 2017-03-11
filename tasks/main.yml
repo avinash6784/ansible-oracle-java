@@ -1,0 +1,42 @@
+---
+
+# Ansible role to install Oracle Java 7
+
+  - name: Check If java is already installed or not
+    shell: "{{ java_name }}/bin/java -version 2>&1 | grep version | awk '{print $3}' | sed 's/\"//g'"
+    register: java_installed
+  
+  - name: Installed java version
+    debug: "msg={{java_installed.stdout}}"
+
+  - block:  
+    - name: Download Java
+      #command: "wget -q -O {{java_archive}} --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' {{download_url}} creates={{java_archive}}" ## Old way to download
+      get_url:
+        url: "{{download_url}}"
+        dest: "{{java_archive}}"
+        headers: 'Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie; --no-check-certificate'     
+
+    - name: Unpack archive
+      #command: "tar -zxf {{java_archive}} -C {{download_folder}} creates={{java_name}}" ## Old way to untar
+      unarchive:
+        src: "{{java_archive}}"
+        dest: "{{download_folder}}"
+        remote_src: yes
+
+    - name: Fix ownership
+      file: state=directory path={{java_name}} owner=root group=root recurse=yes
+
+    - name: Make Java available for system
+      command: 'alternatives --install "/usr/bin/java" "java" "{{java_name}}/bin/java" 2000'
+
+    - name: Set/Configure JAVA_HOME in environment variables 
+      shell: "echo 'export JAVA_HOME={{java_name}}\n export PATH=$JAVA_HOME/bin:$PATH' > {{java_env_file}}"
+    
+    - name: Exports/Run java env file for make JAVA_HOME available globally
+      shell: "source {{java_env_file}}"
+
+    - name: Clean up
+      file: state=absent path={{java_archive}}
+    
+    when: java_installed.stdout == ""
