@@ -7,7 +7,17 @@ Install Oracle Java 1.8, a distributed version control system, on any RHEL/CentO
 None.
 
 ## Role Variables
-None
+```yml
+
+#Role Java vars
+download_url: http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jdk-8u111-linux-x64.tar.gz
+download_folder: /opt
+java_name: "{{download_folder}}/jdk1.8.0_111"
+java_archive: "{{download_folder}}/jdk-8u111-linux-x64.tar.gz"
+java_env_file: "/etc/profile.d/java.sh"
+java_home: /opt/jdk1.8.0_111
+
+```
 
 ## Dependencies
 
