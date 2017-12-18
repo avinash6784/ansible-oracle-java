@@ -2,4 +2,4 @@
 - hosts: localhost
   become: true
   roles:
-    - { role: oracle-java }
+    - { role: ansible-oracle-java }
